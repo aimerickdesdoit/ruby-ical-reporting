@@ -36,9 +36,8 @@ cal = cals.first
 start_min, start_max = [Time.now.beginning_of_week.utc, Time.now.end_of_week.utc]
 
 durations = {}
-excluded_sequence = [2]
 cal.events.each do |event|
-  if event.dtstart > start_min && event.dtend < start_max && !excluded_sequence.include?(event.sequence)
+  if event.dtstart > start_min && event.dtend < start_max && event.transp == 'OPAQUE'
     duration = event.dtend.to_i - event.dtstart.to_i
     key = event.summary.slugify_trim
     durations[key] ||= {:title => event.summary, :duration => 0}
@@ -60,3 +59,9 @@ max_length = content.keys.map { |t| t.length }.max
 content.each do |title, duration|
   puts "#{title.ljust(max_length, ' ')}   #{duration}"
 end
+
+duration = durations.collect { |key, infos| infos[:duration] }.reduce(0) do |a, e|
+  a += e
+  a
+end
+puts "Total des heures : #{time_format duration}"
